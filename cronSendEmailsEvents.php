@@ -55,7 +55,7 @@ foreach ($uniqueGroups as $key => $value) {
 
     $headers .= 'From: <wmmartinez.007@gmail.com>' . "\r\n";
 
-    // mail($to, $subject, $template, $headers);
+    mail($to, $subject, $template, $headers);
 }
 
 ?>
