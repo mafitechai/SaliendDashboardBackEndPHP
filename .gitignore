@@ -1,2 +1,2 @@
-/config/database.php
-/rest/inc/config.php
+config/database.php
+rest/inc/config.php
