@@ -1,5 +1,5 @@
 <?php
-date_default_timezone_set('America/New_York');
+// date_default_timezone_set('America/New_York');
 include_once 'config/database.php';
 include_once 'class/cameras.php';
 include_once 'class/servers.php';
