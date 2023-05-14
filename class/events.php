@@ -757,7 +757,30 @@ class Events
 
         $stmt->execute();
 
-        // $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $row;
+    }
+
+    public function getEventsFiveMinutes()
+    {
+        $query =
+            'SELECT ' .
+            $this->db_table .
+            '.*, slnt_cameras.groupId FROM ' .
+            $this->db_table .
+            ' INNER JOIN slnt_cameras ON slnt_cameras.camIntId = ' .
+            $this->db_table .
+            '.event_camera_id AND ' .
+            $this->db_table .
+            '.event_server_id = slnt_cameras.serverId 
+            WHERE ' .
+            $this->db_table .
+            '.event_date > now() - interval 5 minute';
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->execute();
 
         $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
