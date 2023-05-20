@@ -31,6 +31,7 @@ foreach ($daterange as $date) {
 $dataDisabled = $events->getListIssues($d, $dailyDisabled);
 $dataIssues = $events->getListIssues($d, $dailyIssues);
 $failuresToday = $events->countEvents('today', 'failed');
+$dataAllEvents = $events->getAllEvents($_GET['group']);
 
 
 $data['issues'] = $issues['Count'];
@@ -44,6 +45,8 @@ $data['graphIssues'] =
     sizeof(array_values($dataIssues)) > 0
         ? array_values($dataIssues)
         : [0, 0, 0, 0, 0, 0, 0];
+
+$data['all'] = $dataAllEvents;
 
 echo json_encode($data);
 
