@@ -36,8 +36,14 @@ $failuresToday = $events->countEvents('today', 'failed');
 $data['issues'] = $issues['Count'];
 $data['disabled'] = $disabled['Count'];
 $data['failed'] = $failed['Count'];
-$data['graphDisabled'] = array_values($dataDisabled);
-$data['graphIssues'] = array_values($dataIssues);
+$data['graphDisabled'] =
+    sizeof(array_values($dataDisabled)) > 0
+        ? array_values($dataDisabled)
+        : [0, 0, 0, 0, 0, 0, 0];
+$data['graphIssues'] =
+    sizeof(array_values($dataIssues)) > 0
+        ? array_values($dataIssues)
+        : [0, 0, 0, 0, 0, 0, 0];
 
 echo json_encode($data);
 
