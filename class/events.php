@@ -225,6 +225,371 @@ class Events
         return 0;
     }
 
+    public function getLastMonthEvents($group)
+    {
+        if (intval($group) === 0) {
+            $query =
+                'SELECT DATE_FORMAT(' .
+                $this->db_table .
+                ".event_date, '%Y-%m-%d') AS 'Date' , COUNT(" .
+                $this->db_table .
+                ".event_date) AS 'Count' FROM " .
+                $this->db_table .
+                ' WHERE ' .
+                $this->db_table .
+                '.event_date BETWEEN (CURDATE() - INTERVAL 30 DAY) AND (CURDATE() + INTERVAL 1 DAY) AND ' .
+                $this->db_table .
+                '.event_event = ? GROUP BY DATE_FORMAT(' .
+                $this->db_table .
+                ".event_date, '%Y-%m-%d')";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute(['failed']);
+        } else {
+            $query =
+                'SELECT DATE_FORMAT(' .
+                $this->db_table .
+                ".event_date, '%Y-%m-%d') AS 'Date' , COUNT(" .
+                $this->db_table .
+                ".event_date) AS 'Count' FROM " .
+                $this->db_table .
+                ' LEFT JOIN slnt_cameras ON ' .
+                $this->db_table .
+                '.event_camera_id = slnt_cameras.camIntId AND ' .
+                $this->db_table .
+                '.event_server_id = slnt_cameras.serverId WHERE ' .
+                $this->db_table .
+                '.event_date BETWEEN (CURDATE() - INTERVAL 30 DAY) AND (CURDATE() + INTERVAL 1 DAY) AND slnt_cameras.groupId = ? AND ' .
+                $this->db_table .
+                '.event_event = ? GROUP BY DATE_FORMAT(' .
+                $this->db_table .
+                ".event_date, '%Y-%m-%d')";
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute([$group, 'failed']);
+        }
+
+        // $stmt = $this->conn->prepare($query);
+
+        // $stmt->execute();
+
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $row;
+    }
+
+    public function getDailyEvents($group, $event)
+    {
+        if (intval($group) === 0) {
+            switch ($event) {
+                case 'issues':
+                    $query =
+                        'SELECT DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d") AS "Date", COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) GROUP BY DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d")';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute();
+                    break;
+                case 'disabled':
+                    $query =
+                        'SELECT DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d") AS "Date", COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) AND ' .
+                        $this->db_table .
+                        '.event_event = ? GROUP BY DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d")';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute(['disabled']);
+                    break;
+                case 'failed':
+                    $query =
+                        'SELECT DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d") AS "Date", COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) AND ' .
+                        $this->db_table .
+                        '.event_event = ? GROUP BY DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d")';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute(['failed']);
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        } else {
+            switch ($event) {
+                case 'issues':
+                    $query =
+                        'SELECT DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d") AS "Date", COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' LEFT JOIN slnt_cameras ON ' .
+                        $this->db_table .
+                        '.event_camera_id = slnt_cameras.camIntId AND ' .
+                        $this->db_table .
+                        '.event_server_id = slnt_cameras.serverId WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) and slnt_cameras.groupId = ? GROUP BY DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d")';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute([$group]);
+                    break;
+                case 'disabled':
+                    $query =
+                        'SELECT DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d") AS "Date", COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' LEFT JOIN slnt_cameras ON ' .
+                        $this->db_table .
+                        '.event_camera_id = slnt_cameras.camIntId AND ' .
+                        $this->db_table .
+                        '.event_server_id = slnt_cameras.serverId WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) and slnt_cameras.groupId = ? AND ' .
+                        $this->db_table .
+                        '.event_event = ? GROUP BY DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d")';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute([$group, 'disabled']);
+                    break;
+                case 'failed':
+                    $query =
+                        'SELECT DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d") AS "Date", COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' LEFT JOIN slnt_cameras ON ' .
+                        $this->db_table .
+                        '.event_camera_id = slnt_cameras.camIntId AND ' .
+                        $this->db_table .
+                        '.event_server_id = slnt_cameras.serverId WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) and slnt_cameras.groupId = ? AND ' .
+                        $this->db_table .
+                        '.event_event = ? GROUP BY DATE_FORMAT(' .
+                        $this->db_table .
+                        '.event_date, "%Y-%m-%d")';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute([$group, 'failed']);
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        }
+
+        // $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $row;
+    }
+
+    public function getWeeklyEvents($group, $event)
+    {
+        if (intval($group) === 0) {
+            switch ($event) {
+                case 'issues':
+                    $query =
+                        'SELECT COUNT(' .
+                        $this->db_table .
+                        ".event_date) AS 'Count' FROM " .
+                        $this->db_table .
+                        ' WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE()))';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute();
+                    break;
+                case 'disabled':
+                    $query =
+                        'SELECT COUNT(' .
+                        $this->db_table .
+                        ".event_date) AS 'Count' FROM " .
+                        $this->db_table .
+                        ' WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) AND ' .
+                        $this->db_table .
+                        '.event_event = ?';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute(['disabled']);
+                    break;
+                case 'failed':
+                    $query =
+                        'SELECT COUNT(' .
+                        $this->db_table .
+                        ".event_date) AS 'Count' FROM " .
+                        $this->db_table .
+                        ' WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) AND ' .
+                        $this->db_table .
+                        '.event_event = ?';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute(['failed']);
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        } else {
+            switch ($event) {
+                case 'issues':
+                    $query =
+                        'SELECT COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS Count FROM ' .
+                        $this->db_table .
+                        ' LEFT JOIN slnt_cameras ON ' .
+                        $this->db_table .
+                        '.event_camera_id = slnt_cameras.camIntId AND ' .
+                        $this->db_table .
+                        '.event_server_id = slnt_cameras.serverId WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) AND slnt_cameras.groupId = ?';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute([$group]);
+                    break;
+                case 'disabled':
+                    $query =
+                        'SELECT COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' LEFT JOIN slnt_cameras ON ' .
+                        $this->db_table .
+                        '.event_camera_id = slnt_cameras.camIntId AND ' .
+                        $this->db_table .
+                        '.event_server_id = slnt_cameras.serverId WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) AND slnt_cameras.groupId = ? AND ' .
+                        $this->db_table .
+                        '.event_event = ?';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute([$group, 'disabled']);
+                    break;
+                case 'failed':
+                    $query =
+                        'SELECT COUNT(' .
+                        $this->db_table .
+                        '.event_date) AS "Count" FROM ' .
+                        $this->db_table .
+                        ' LEFT JOIN slnt_cameras ON ' .
+                        $this->db_table .
+                        '.event_camera_id = slnt_cameras.camIntId AND ' .
+                        $this->db_table .
+                        '.event_server_id = slnt_cameras.serverId WHERE WEEKOFYEAR(' .
+                        $this->db_table .
+                        '.event_date) = (weekofyear(CURDATE())) AND slnt_cameras.groupId = ? AND ' .
+                        $this->db_table .
+                        '.event_event = ?';
+
+                    $stmt = $this->conn->prepare($query);
+
+                    $stmt->execute([$group, 'failed']);
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        }
+
+        // $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row;
+    }
+
+    public function getListIssues($period, $list, $dateFormat = 'D')
+    {
+        $listEvents = [];
+        $listGraph = [];
+        foreach ($period as $keyDay => $valueDay) {
+            foreach ($list as $key => $value) {
+                if ($value['Date'] == $valueDay) {
+                    $date = date_create($valueDay);
+                    $listEvents[date_format($date, $dateFormat)] = intval(
+                        $value['Count']
+                    );
+                    // $listEvents[$valueDay] = intval($value['Count']);
+                    break;
+                } else {
+                    $date = date_create($valueDay);
+                    $listEvents[date_format($date, $dateFormat)] = 0;
+                }
+            }
+        }
+    
+        $data = array_values($listEvents);
+        $labels = array_keys($listEvents);
+        $listGraph['data'] = $data;
+        $listGraph['labels'] = $labels;
+    
+        return $listEvents;
+    }
+
     public function storeEvents($data)
     {
         $upinsert = $this->getEvent($data);
@@ -248,7 +613,14 @@ class Events
                 $days = (strtotime($today) - strtotime($upinsert[4])) / 86400;
 
                 if ($days > 1) {
-                    $response = $this->saveEvent($name, $server, $event, $date, $serverId, $id);
+                    $response = $this->saveEvent(
+                        $name,
+                        $server,
+                        $event,
+                        $date,
+                        $serverId,
+                        $id
+                    );
                     return $response;
                 }
 
@@ -261,13 +633,27 @@ class Events
                     $response = $this->updateEventDate($upinsert[0], $date);
                     return $response;
                 } else {
-                    $response = $this->saveEvent($name, $server, $event, $date, $serverId, $id);
+                    $response = $this->saveEvent(
+                        $name,
+                        $server,
+                        $event,
+                        $date,
+                        $serverId,
+                        $id
+                    );
 
                     return $response;
                 }
             }
         } else {
-            $response = $this->saveEvent($name, $server, $event, $date, $serverId, $id);
+            $response = $this->saveEvent(
+                $name,
+                $server,
+                $event,
+                $date,
+                $serverId,
+                $id
+            );
 
             return $response;
         }
@@ -297,12 +683,6 @@ class Events
 
         $stmt = $this->conn->prepare($query);
 
-        // $name2 = 'VA | COUNTING ROOM';
-
-        // $server2 = 'CA | 6203 - 01';
-
-        // $event2 = 'failed';
-
         $stmt->execute([$name, $server, $event]);
 
         // $row = $stmt->fetchAll();
@@ -327,15 +707,29 @@ class Events
         return $row;
     }
 
-    public function saveEvent($name, $server, $event, $date, $serverId, $cameraId)
-    {
+    public function saveEvent(
+        $name,
+        $server,
+        $event,
+        $date,
+        $serverId,
+        $cameraId
+    ) {
         $query =
             'INSERT INTO ' .
             $this->db_table .
             " (event_camera, event_server, event_event, event_date, event_updated_at, event_server_id, event_camera_id)
                     VALUES (?, ?, ?,?, ?, ?, ?)";
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$name, $server, $event, $date, null, $serverId, $cameraId]);
+        $stmt->execute([
+            $name,
+            $server,
+            $event,
+            $date,
+            null,
+            $serverId,
+            $cameraId,
+        ]);
         $row = $stmt->rowCount();
 
         return $row;
@@ -350,7 +744,9 @@ class Events
             $this->db_table .
             ' INNER JOIN slnt_cameras ON slnt_cameras.camIntId = ' .
             $this->db_table .
-            '.event_camera_id AND ' .$this->db_table .'.event_server_id = slnt_cameras.serverId 
+            '.event_camera_id AND ' .
+            $this->db_table .
+            '.event_server_id = slnt_cameras.serverId 
             WHERE ' .
             $this->db_table .
             '.event_date >= CURRENT_DATE() OR ' .
