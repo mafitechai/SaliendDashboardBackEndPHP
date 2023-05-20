@@ -9,7 +9,7 @@
     $database = new Database();
     $db = $database->getConnection();
     $events = new Events($db);
-    
+    // test
     //$todayEvents = $events->getTodayEvents();
 
     if(true){
