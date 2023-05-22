@@ -40,6 +40,58 @@ class Events
         $this->startWeekC = date('Y-m-d', $this->startWeekC);
     }
 
+    // Get all events
+    public function getAllEvents($group){
+
+        if (intval($group) === 0) {
+            $query =
+                'SELECT ' .
+                $this->db_table .
+                ".event_id AS id, " .
+                $this->db_table .
+                ".event_camera AS camera, " . 
+                $this->db_table .
+                ".event_server AS server, " .
+                $this->db_table .
+                ".event_event AS event, " . 
+                $this->db_table .
+                ".event_date AS eventdate, " . 
+                $this->db_table .
+                ".event_updated_at AS eventdateat FROM " . $this->db_table;
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute();
+        } else {
+            $query =
+                'SELECT ' .
+                $this->db_table .
+                ".event_id AS id, " . 
+                $this->db_table .
+                ".event_camera AS camera, " .
+                $this->db_table .
+                ".event_server AS server, " .
+                $this->db_table .
+                ".event_event AS event, " .
+                $this->db_table . 
+                ".event_date AS eventdate, " .
+                $this->db_table .
+                ".event_updated_at AS eventdateat FROM " . $this->db_table;
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->execute();
+        }
+
+        // $stmt = $this->conn->prepare($query);
+
+        // $stmt->execute();
+
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $row;
+    }
+
     //Get today events
     public function countEvents($range, $event = false, $customDate = false)
     {
