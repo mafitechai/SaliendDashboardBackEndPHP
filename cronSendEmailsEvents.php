@@ -5,6 +5,12 @@ include_once 'class/users.php';
 include_once 'class/cameras.php';
 include_once 'class/groups.php';
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
+require 'PHPMailer/src/Exception.php';
+
 $database = new Database();
 $db = $database->getConnection();
 $events = new Events($db);
@@ -49,13 +55,47 @@ foreach ($uniqueGroups as $key => $value) {
 
     $to = $email;
     $subject = 'Report Cameras Fails';
+    $from = 'info@mafi.ai';
+    $from_name = 'Support Notification System';
 
-    $headers = 'MIME-Version: 1.0' . "\r\n";
-    $headers .= 'Content-type:text/html;charset=UTF-8' . "\r\n";
+    $mail = new PHPMailer();
 
-    $headers .= 'From: <wmmartinez.007@gmail.com>' . "\r\n";
+    $mail->isSMTP();
 
-    mail($to, $subject, $template, $headers);
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'info@mafi.ai';
+    $mail->Password = 'zvjnkownpclikuef';
+    $mail->SMTPSecure = 'tls';
+    $mail->Port = 587;
+
+    // $mail->SMTPDebug  = 3;
+    // $mail->Debugoutput = function($str, $level) {echo "debug level $level; message: $str";}; //$mail->Debugoutput = 'echo';
+
+    $mail->SMTPOptions = array(
+        'ssl' => array(
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+        'allow_self_signed' => true
+        )
+        );
+
+    $mail->IsHTML(true);
+    $mail->setFrom('support@saltexgroup.com', 'Support Notification System');
+    $mail->AddReplyTo($from, $from_name);
+    // $mail->addBcc('mauricio@saltexgroup.com','Mauricio Salmon');
+    // $mail->addBcc('marloncs@gmail.com','Marlon Cruces');
+    // $mail->addBcc('nick@saltexgroup.com','Nick Pineda');
+    $mail->Subject = $subject;
+    $mail->Body = $template;
+    $mail->AddAddress($to);
+
+    if(!$mail->send()){
+        echo 'Message could not be sent.';
+        echo 'Mailer Error: ' . $mail->ErrorInfo;
+    }else{
+        echo 'Message has been sent';
+    }
 }
 
 ?>
