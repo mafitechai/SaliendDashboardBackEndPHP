@@ -41,9 +41,6 @@ foreach ($uniqueGroups as $key => $value) {
     // print_r($filterGroup);
     // echo '</pre>';
 
-    // $today = date('Y-m-d H:i:s');
-    // $days = (strtotime($today) - strtotime($upinsert[4])) / 86400;
-
     $table = '';
 
     foreach ($filterGroup as $keyList => $valueList) {
