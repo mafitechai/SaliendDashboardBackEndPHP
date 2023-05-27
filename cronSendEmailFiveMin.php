@@ -21,9 +21,11 @@ $groups = new Groups($db);
 $currentEvents = $events->getEventsFiveMinutes();
 $groupList = [];
 $emailTo = [];
-// print_r($currentEvents);
+$today = date('Y-m-d H:i:s');
 
 foreach ($currentEvents as $key => $value) {
+    $currentEvents[$key]['days'] =
+        round((strtotime($today) - strtotime($value['event_date'])) / 86400);
     $groupList[$key] = $value['groupId'];
 }
 
@@ -103,7 +105,11 @@ foreach ($uniqueGroups as $key => $value) {
     // $mail->addBcc('nick@saltexgroup.com','Nick Pineda');
     $mail->Subject = $subject;
     $mail->Body = $template;
-    $mail->AddAddress($to);
+    
+    foreach ($emailTo as $key => $value) {
+        $mail->AddAddress($value);
+    }
+   
 
     if(!$mail->send()){
         echo 'Message could not be sent.';
