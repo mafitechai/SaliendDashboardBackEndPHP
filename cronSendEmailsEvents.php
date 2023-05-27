@@ -20,8 +20,13 @@ $groups = new Groups($db);
 
 $currentEvents = $events->getCurrentEvents();
 $groupList = [];
+$today = date('Y-m-d H:i:s');
+
 
 foreach ($currentEvents as $key => $value) {
+    $currentEvents[$key]['days'] =
+        round((strtotime($today) - strtotime($value['event_date'])) / 86400);
+    
     $groupList[$key] = $value['groupId'];
 }
 
@@ -35,6 +40,9 @@ foreach ($uniqueGroups as $key => $value) {
     // echo '<pre>';
     // print_r($filterGroup);
     // echo '</pre>';
+
+    // $today = date('Y-m-d H:i:s');
+    // $days = (strtotime($today) - strtotime($upinsert[4])) / 86400;
 
     $table = '';
 
@@ -72,13 +80,13 @@ foreach ($uniqueGroups as $key => $value) {
     // $mail->SMTPDebug  = 3;
     // $mail->Debugoutput = function($str, $level) {echo "debug level $level; message: $str";}; //$mail->Debugoutput = 'echo';
 
-    $mail->SMTPOptions = array(
-        'ssl' => array(
-        'verify_peer' => false,
-        'verify_peer_name' => false,
-        'allow_self_signed' => true
-        )
-        );
+    $mail->SMTPOptions = [
+        'ssl' => [
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true,
+        ],
+    ];
 
     $mail->IsHTML(true);
     $mail->setFrom('support@saltexgroup.com', 'Support Notification System');
@@ -90,10 +98,10 @@ foreach ($uniqueGroups as $key => $value) {
     $mail->Body = $template;
     $mail->AddAddress($to);
 
-    if(!$mail->send()){
+    if (!$mail->send()) {
         echo 'Message could not be sent.';
         echo 'Mailer Error: ' . $mail->ErrorInfo;
-    }else{
+    } else {
         echo 'Message has been sent';
     }
 }
